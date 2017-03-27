@@ -14,9 +14,9 @@ namespace _3D_House
         private static System.Diagnostics.Stopwatch watch;
 
         private static ShaderProgram program;
-        private static VBO<Vector3> cube, cubeNormals, cubeTangents;
+        private static VBO<Vector3> cube, cubeNormals, cubeTangents, pyramidColor, pyramid;
         private static VBO<Vector2> cubeUV;
-        private static VBO<int> cubeTriangles;
+        private static VBO<int> cubeTriangles, pyramidTriangles;
         private static Texture brickDiffuse, brickNormals;
         private static float xangle, yangle;
         private static bool autoRotate, lighting = true, fullscreen = false, normalMapping = false;
@@ -60,13 +60,27 @@ namespace _3D_House
             brickDiffuse = new Texture(@"D:\Diego Jacobs\Google Dirve\UVG\Semestre 9\Graficas\Proyecto 3\3D-House\3D-House\Images\AlternatingBrick-ColorMap.png");
             brickNormals = new Texture(@"D:\Diego Jacobs\Google Dirve\UVG\Semestre 9\Graficas\Proyecto 3\3D-House\3D-House\Images\AlternatingBrick-NormalMap.png");
 
+            // create a pyramid with vertices and colors
+            pyramid = new VBO<Vector3>(new Vector3[] {
+                new Vector3(-1, 1, 1), new Vector3(1, 1, 1), new Vector3(0, 2, 0),        // front face
+                new Vector3(1, 1, 1), new Vector3(0, 2, 0), new Vector3(1, 1, -1),        // right face
+                new Vector3(-1, 1, -1), new Vector3(0, 2, 0), new Vector3(1, 1, -1),      // back face
+                new Vector3(-1, 1, 1), new Vector3(0, 2, 0), new Vector3(-1, 1, -1) });   // left face
+            pyramidColor = new VBO<Vector3>(new Vector3[] {
+                new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1),
+                new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, 1, 0),
+                new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1),
+                new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, 1, 0) });
+            pyramidTriangles = new VBO<int>(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }, BufferTarget.ElementArrayBuffer);
+
+
             Vector3[] vertices = new Vector3[] {
                 new Vector3(1, 1, -1), new Vector3(-1, 1, -1), new Vector3(-1, 1, 1), new Vector3(1, 1, 1),         // top
                 new Vector3(1, -1, 1), new Vector3(-1, -1, 1), new Vector3(-1, -1, -1), new Vector3(1, -1, -1),     // bottom
                 new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(-1, -1, 1), new Vector3(1, -1, 1),         // front face
                 new Vector3(1, -1, -1), new Vector3(-1, -1, -1), new Vector3(-1, 1, -1), new Vector3(1, 1, -1),     // back face
                 new Vector3(-1, 1, 1), new Vector3(-1, 1, -1), new Vector3(-1, -1, -1), new Vector3(-1, -1, 1),     // left
-                new Vector3(1, 1, -1), new Vector3(1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, -1, -1) };
+                new Vector3(1, 1, -1), new Vector3(1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, -1, -1) };       // right
             cube = new VBO<Vector3>(vertices);
 
             Vector2[] uvs = new Vector2[] {
@@ -146,6 +160,10 @@ namespace _3D_House
 
         private static void OnClose()
         {
+            pyramid.Dispose();
+            pyramidColor.Dispose();
+            pyramidTriangles.Dispose();
+
             cube.Dispose();
             cubeNormals.Dispose();
             cubeUV.Dispose();
@@ -227,6 +245,13 @@ namespace _3D_House
             program["model_matrix"].SetValue(Matrix4.CreateRotationY(yangle) * Matrix4.CreateRotationX(xangle));
             program["enable_lighting"].SetValue(lighting);
             program["enable_mapping"].SetValue(normalMapping);
+
+            Gl.BindBufferToShaderAttribute(pyramid, program, "vertexPosition");
+            Gl.BindBufferToShaderAttribute(pyramidColor, program, "vertexColor");
+            Gl.BindBuffer(pyramidTriangles);
+
+            // draw the pyramid
+            Gl.DrawElements(BeginMode.Triangles, pyramidTriangles.Count, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             Gl.BindBufferToShaderAttribute(cube, program, "vertexPosition");
             Gl.BindBufferToShaderAttribute(cubeNormals, program, "vertexNormal");
