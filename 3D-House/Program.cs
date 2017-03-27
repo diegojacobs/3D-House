@@ -14,7 +14,7 @@ namespace _3D_House
         private static System.Diagnostics.Stopwatch watch;
 
         private static ShaderProgram program;
-        private static VBO<Vector3> cube, cubeNormals, cubeTangents, pyramidColor, pyramid;
+        private static VBO<Vector3> cube, cubeNormals, cubeTangents, pyramid;
         private static VBO<Vector2> cubeUV;
         private static VBO<int> cubeTriangles, pyramidTriangles;
         private static Texture brickDiffuse, brickNormals;
@@ -25,7 +25,7 @@ namespace _3D_House
         static void Main(string[] args)
         {
             Glut.glutInit();
-            Glut.glutInitDisplayMode(Glut.GLUT_DOUBLE | Glut.GLUT_DEPTH | Glut.GLUT_MULTISAMPLE);   // multisampling makes things beautiful!
+            Glut.glutInitDisplayMode(Glut.GLUT_DOUBLE | Glut.GLUT_DEPTH | Glut.GLUT_MULTISAMPLE);
             Glut.glutInitWindowSize(width, height);
             Glut.glutCreateWindow("Project #3");
 
@@ -60,17 +60,12 @@ namespace _3D_House
             brickDiffuse = new Texture(@"D:\Diego Jacobs\Google Dirve\UVG\Semestre 9\Graficas\Proyecto 3\3D-House\3D-House\Images\AlternatingBrick-ColorMap.png");
             brickNormals = new Texture(@"D:\Diego Jacobs\Google Dirve\UVG\Semestre 9\Graficas\Proyecto 3\3D-House\3D-House\Images\AlternatingBrick-NormalMap.png");
 
-            // create a pyramid with vertices and colors
+            // create a pyramid
             pyramid = new VBO<Vector3>(new Vector3[] {
                 new Vector3(-1, 1, 1), new Vector3(1, 1, 1), new Vector3(0, 2, 0),        // front face
                 new Vector3(1, 1, 1), new Vector3(0, 2, 0), new Vector3(1, 1, -1),        // right face
                 new Vector3(-1, 1, -1), new Vector3(0, 2, 0), new Vector3(1, 1, -1),      // back face
                 new Vector3(-1, 1, 1), new Vector3(0, 2, 0), new Vector3(-1, 1, -1) });   // left face
-            pyramidColor = new VBO<Vector3>(new Vector3[] {
-                new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1),
-                new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, 1, 0),
-                new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1),
-                new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, 1, 0) });
             pyramidTriangles = new VBO<int>(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }, BufferTarget.ElementArrayBuffer);
 
 
@@ -161,7 +156,6 @@ namespace _3D_House
         private static void OnClose()
         {
             pyramid.Dispose();
-            pyramidColor.Dispose();
             pyramidTriangles.Dispose();
 
             cube.Dispose();
@@ -247,7 +241,6 @@ namespace _3D_House
             program["enable_mapping"].SetValue(normalMapping);
 
             Gl.BindBufferToShaderAttribute(pyramid, program, "vertexPosition");
-            Gl.BindBufferToShaderAttribute(pyramidColor, program, "vertexColor");
             Gl.BindBuffer(pyramidTriangles);
 
             // draw the pyramid
